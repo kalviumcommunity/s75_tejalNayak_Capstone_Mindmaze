@@ -31,9 +31,11 @@ app.post("/api/levels", (req, res) => {
   }
 
   const newLevel = {
-    id: levels.length + 1,
-    name: name,
-    grid: grid
+    id: levels.length
+      ? Math.max(...levels.map(level => level.id)) + 1
+      : 1,
+    name,
+    grid
   };
 
   levels.push(newLevel);
@@ -41,6 +43,33 @@ app.post("/api/levels", (req, res) => {
   res.status(201).json({
     message: "Level created successfully",
     level: newLevel
+  });
+});
+
+app.put("/api/levels/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const { name, grid } = req.body;
+
+  const level = levels.find(level => level.id === id);
+
+  if (!level) {
+    return res.status(404).json({
+      message: "Level not found"
+    });
+  }
+
+  if (!name || !grid) {
+    return res.status(400).json({
+      message: "Level name and grid are required"
+    });
+  }
+
+  level.name = name;
+  level.grid = grid;
+
+  res.json({
+    message: "Level updated successfully",
+    level
   });
 });
 
