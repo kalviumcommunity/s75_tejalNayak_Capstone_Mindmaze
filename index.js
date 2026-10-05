@@ -1,7 +1,16 @@
+require("dotenv").config();
+
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+
+const Level = require("./models/Level");
 
 const app = express();
+
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
@@ -11,68 +20,104 @@ app.get("/", (req, res) => {
   res.send("Mind Maze backend is running 🚀");
 });
 
-let levels = [
-  { id: 1, name: "Easy", grid: "6x6" },
-  { id: 2, name: "Medium", grid: "8x8" },
-  { id: 3, name: "Hard", grid: "10x10" }
-];
+app.get("/api/levels", async (req, res) => {
+  try {
+    const levels = await Level.find().sort({ id: 1 });
 
-app.get("/api/levels", (req, res) => {
-  res.json(levels);
-});
+    res.json(levels);
+  } catch (error) {
+    console.error("Error reading levels:", error);
 
-app.post("/api/levels", (req, res) => {
-  const { name, grid } = req.body;
-
-  if (!name || !grid) {
-    return res.status(400).json({
-      message: "Level name and grid are required"
+    res.status(500).json({
+      message: "Failed to fetch levels"
     });
   }
+});
 
-  const newLevel = {
-    id: levels.length
-      ? Math.max(...levels.map(level => level.id)) + 1
-      : 1,
-    name,
-    grid
-  };
+app.post("/api/levels", async (req, res) => {
+  try {
+    const { name, grid } = req.body;
 
-  levels.push(newLevel);
+    if (!name || !grid) {
+      return res.status(400).json({
+        message: "Level name and grid are required"
+      });
+    }
 
-  res.status(201).json({
-    message: "Level created successfully",
-    level: newLevel
+    const lastLevel = await Level.findOne().sort({ id: -1 });
+
+    const newId = lastLevel ? lastLevel.id + 1 : 1;
+
+    const newLevel = await Level.create({
+      id: newId,
+      name,
+      grid
+    });
+
+    res.status(201).json({
+      message: "Level created successfully",
+      level: newLevel
+    });
+  } catch (error) {
+    console.error("Error creating level:", error);
+
+    res.status(500).json({
+      message: "Failed to create level"
+    });
+  }
+});
+
+app.put("/api/levels/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { name, grid } = req.body;
+
+    if (!name || !grid) {
+      return res.status(400).json({
+        message: "Level name and grid are required"
+      });
+    }
+
+    const updatedLevel = await Level.findOneAndUpdate(
+      { id },
+      {
+        name,
+        grid
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!updatedLevel) {
+      return res.status(404).json({
+        message: "Level not found"
+      });
+    }
+
+    res.json({
+      message: "Level updated successfully",
+      level: updatedLevel
+    });
+  } catch (error) {
+    console.error("Error updating level:", error);
+
+    res.status(500).json({
+      message: "Failed to update level"
+    });
+  }
+});
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("MongoDB connection failed:", error);
   });
-});
-
-app.put("/api/levels/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const { name, grid } = req.body;
-
-  const level = levels.find(level => level.id === id);
-
-  if (!level) {
-    return res.status(404).json({
-      message: "Level not found"
-    });
-  }
-
-  if (!name || !grid) {
-    return res.status(400).json({
-      message: "Level name and grid are required"
-    });
-  }
-
-  level.name = name;
-  level.grid = grid;
-
-  res.json({
-    message: "Level updated successfully",
-    level
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
