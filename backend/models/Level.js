@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const levelSchema = new mongoose.Schema(
@@ -19,10 +20,18 @@ const levelSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 
+// One Level can have multiple Tiles
+levelSchema.virtual("tiles", {
+  ref: "Tile",
+  localField: "_id",
+  foreignField: "level"
+});
 
 const Level = mongoose.model("Level", levelSchema);
 

@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 
 const dns = require("dns");
@@ -8,6 +9,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 
 const Level = require("./models/Level");
+const Tile = require("./models/Tile");
 
 const app = express();
 
@@ -16,10 +18,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Home route
 app.get("/", (req, res) => {
   res.send("Mind Maze backend is running 🚀");
 });
 
+// GET all levels
 app.get("/api/levels", async (req, res) => {
   try {
     const levels = await Level.find().sort({ id: 1 });
@@ -34,6 +38,7 @@ app.get("/api/levels", async (req, res) => {
   }
 });
 
+// POST a new level
 app.post("/api/levels", async (req, res) => {
   try {
     const { name, grid } = req.body;
@@ -67,14 +72,15 @@ app.post("/api/levels", async (req, res) => {
   }
 });
 
+// PUT update an existing level
 app.put("/api/levels/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { name, grid } = req.body;
 
-    if (!name || !grid) {
+    if (!Number.isInteger(id) || !name || !grid) {
       return res.status(400).json({
-        message: "Level name and grid are required"
+        message: "Valid level ID, name and grid are required"
       });
     }
 
@@ -109,6 +115,101 @@ app.put("/api/levels/:id", async (req, res) => {
   }
 });
 
+// POST create a tile and associate it with a level
+app.post("/api/levels/:id/tiles", async (req, res) => {
+  try {
+    const levelId = Number(req.params.id);
+    const { row, col, type, rotation } = req.body;
+
+    if (
+      !Number.isInteger(levelId) ||
+      !Number.isInteger(row) ||
+      !Number.isInteger(col) ||
+      row < 0 ||
+      col < 0
+    ) {
+      return res.status(400).json({
+        message: "Valid level ID, row and col are required"
+      });
+    }
+
+    const level = await Level.findOne({ id: levelId });
+
+    if (!level) {
+      return res.status(404).json({
+        message: "Level not found"
+      });
+    }
+
+    const newTile = await Tile.create({
+      row,
+      col,
+      type,
+      rotation,
+      level: level._id
+    });
+
+    res.status(201).json({
+      message: "Tile created and linked to level successfully",
+      tile: newTile
+    });
+  } catch (error) {
+    console.error("Error creating tile:", error);
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        message: "A tile already exists at this position in this level"
+      });
+    }
+
+    res.status(500).json({
+      message: "Failed to create tile"
+    });
+  }
+});
+
+// GET all tiles belonging to a level
+app.get("/api/levels/:id/tiles", async (req, res) => {
+  try {
+    const levelId = Number(req.params.id);
+
+    if (!Number.isInteger(levelId)) {
+      return res.status(400).json({
+        message: "Invalid level ID"
+      });
+    }
+
+    const level = await Level.findOne({ id: levelId });
+
+    if (!level) {
+      return res.status(404).json({
+        message: "Level not found"
+      });
+    }
+
+    const tiles = await Tile.find({
+      level: level._id
+    }).populate("level", "id name grid");
+
+    res.json({
+      message: "Tiles retrieved successfully",
+      level: {
+        id: level.id,
+        name: level.name,
+        grid: level.grid
+      },
+      tiles
+    });
+  } catch (error) {
+    console.error("Error retrieving tiles:", error);
+
+    res.status(500).json({
+      message: "Failed to retrieve tiles"
+    });
+  }
+});
+
+// MongoDB connection and server startup
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
