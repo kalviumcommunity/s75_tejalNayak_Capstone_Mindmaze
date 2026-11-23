@@ -147,8 +147,8 @@ function App() {
         </section>
 
         <p className="prototype-note">
-          The board, level selector, tile rotation, and countdown are interactive.
-          Route validation and win detection are not implemented in this module.
+          Implemented in this build: level selection, 6×6 to 10×10 boards,
+          clockwise tile rotation, reset controls, and countdown timer.
         </p>
       </main>
 
