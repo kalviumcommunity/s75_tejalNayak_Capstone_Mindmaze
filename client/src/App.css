@@ -98,6 +98,7 @@
 
 .hero-section h1 span {
   color: var(--mint);
+  text-shadow: 0 0 28px rgba(135, 243, 204, 0.12);
 }
 
 .hero-copy {
@@ -177,7 +178,9 @@
 .level-card.is-selected {
   border-color: var(--card-color);
   background: color-mix(in srgb, var(--card-color) 8%, var(--panel));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-color) 35%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--card-color) 35%, transparent),
+    0 10px 24px rgba(0, 0, 0, 0.16);
 }
 
 .level-card--mint {
@@ -240,6 +243,7 @@
 
 .board-panel {
   padding: 22px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
 }
 
 .board-panel__heading {
@@ -332,11 +336,13 @@
 .tile--start {
   border-color: rgba(135, 243, 204, 0.7);
   background: rgba(135, 243, 204, 0.1);
+  box-shadow: inset 0 0 16px rgba(135, 243, 204, 0.08);
 }
 
 .tile--exit {
   border-color: rgba(255, 133, 162, 0.65);
   background: rgba(255, 133, 162, 0.09);
+  box-shadow: inset 0 0 16px rgba(255, 133, 162, 0.08);
 }
 
 .tile__pipes {
@@ -372,12 +378,14 @@
 
 .tile__endpoint {
   position: absolute;
-  top: 2px;
-  left: 3px;
+  top: 3px;
+  left: 4px;
   color: var(--mint);
   font-family: var(--mono);
   font-size: clamp(6px, 1vw, 9px);
   font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 8px currentColor;
 }
 
 .tile--exit .tile__endpoint {

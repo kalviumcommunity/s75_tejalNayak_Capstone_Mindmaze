@@ -34,6 +34,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(135, 243, 204, 0.055), transparent 34rem),
+    var(--bg);
 }
 
 button,

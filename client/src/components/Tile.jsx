@@ -8,12 +8,14 @@ const tilePaths = {
 function Tile({ tile, row, column, isStart, isExit, onRotate }) {
   const position = `Row ${row + 1}, column ${column + 1}`
   const endpoint = isStart ? ', start' : isExit ? ', exit' : ''
+  const endpointLabel = isStart ? 'Start tile' : isExit ? 'Exit tile' : 'Connector tile'
 
   return (
     <button
       className={`tile${isStart ? ' tile--start' : ''}${isExit ? ' tile--exit' : ''}`}
       type="button"
       aria-label={`${position}${endpoint}, ${tile.kind} connector. Rotate clockwise.`}
+      title={endpointLabel}
       onClick={() => onRotate(tile.id)}
     >
       <svg
