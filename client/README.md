@@ -14,3 +14,9 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## High-Fidelity Prototype – Mind Maze
+
+[https://funny-narwhal-988b5f.netlify.app/](https://funny-narwhal-988b5f.netlify.app/)
+
+This deployed frontend represents the implemented high-fidelity interface of my Mind Maze capstone project, showcasing the dark neon-themed design, difficulty selection, game board, tile presentation, layout and available interactions.
